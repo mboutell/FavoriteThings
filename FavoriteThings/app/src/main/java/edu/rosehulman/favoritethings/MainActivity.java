@@ -28,6 +28,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         mDocRef =  FirebaseFirestore.getInstance().document("FavoriteThings/pNfAd1eN4anDtAg2CLqi");
 
         mColorTextView = (TextView) findViewById(R.id.color_text_view);
