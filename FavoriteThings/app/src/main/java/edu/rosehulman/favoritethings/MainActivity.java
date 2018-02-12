@@ -7,7 +7,10 @@ import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.EventListener;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.FirebaseFirestoreException;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -41,6 +44,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.update_color_button).setOnClickListener(this);
         findViewById(R.id.increment_number_button).setOnClickListener(this);
         findViewById(R.id.decrement_number_button).setOnClickListener(this);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mDocRef.addSnapshotListener(this, new EventListener<DocumentSnapshot>() {
+            @Override
+            public void onEvent(DocumentSnapshot documentSnapshot, FirebaseFirestoreException e) {
+                if (documentSnapshot.exists()) {
+                    String color = documentSnapshot.getString(COLOR_KEY);
+                    mColorTextView.setText(color);
+                    mNumber = documentSnapshot.getLong(NUMBER_KEY);
+                    mNumberTextView.setText(mNumber + "");
+                }
+            }
+        });
     }
 
     @Override
@@ -50,37 +70,43 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         switch (view.getId()) {
             case R.id.red_button:
-                mColorTextView.setText(R.string.red);
+                //mColorTextView.setText(R.string.red);
                 dataToSave.put(COLOR_KEY, "red");
                 break;
             case R.id.white_button:
-                mColorTextView.setText(R.string.white);
+                //mColorTextView.setText(R.string.white);
                 dataToSave.put(COLOR_KEY, "white");
                 break;
             case R.id.blue_button:
-                mColorTextView.setText(R.string.blue);
+                //mColorTextView.setText(R.string.blue);
                 dataToSave.put(COLOR_KEY, "blue");
                 break;
             case R.id.update_color_button:
                 Log.d(TAG, "Updating from Firebase");
+                mDocRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                    @Override
+                    public void onSuccess(DocumentSnapshot documentSnapshot) {
+                        if (documentSnapshot.exists()) {
+                            String color = documentSnapshot.getString(COLOR_KEY);
+                            mColorTextView.setText(color);
+                            mNumber = documentSnapshot.getLong(NUMBER_KEY);
+                            mNumberTextView.setText(mNumber + "");
+                        }
+                    }
+                });
                 break;
             case R.id.increment_number_button:
                 mNumber++;
-                mNumberTextView.setText("" + mNumber);
+                //mNumberTextView.setText("" + mNumber);
                 dataToSave.put(NUMBER_KEY, mNumber);
                 break;
             case R.id.decrement_number_button:
                 mNumber--;
-                mNumberTextView.setText("" + mNumber);
+                //mNumberTextView.setText("" + mNumber);
                 dataToSave.put(NUMBER_KEY, mNumber);
                 break;
         }
-        mDocRef.update(dataToSave).addOnSuccessListener(new OnSuccessListener<Void>() {
-            @Override
-            public void onSuccess(Void aVoid) {
-
-            }
-        });
+        mDocRef.update(dataToSave);
 
 
     }
